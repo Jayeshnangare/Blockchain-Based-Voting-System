@@ -19,7 +19,7 @@ const AppNavigator = () => {
         <Stack.Screen name="Admin" component={AdminScreen} />
         <Stack.Screen name="Voting" component={VotingScreen} />
         <Stack.Screen name="Results" component={ResultsScreen} />
-        <Stack.Screen name="Main" component={MainScreen} />
+        <Stack.Screen name="Main" component={MainScreen}  options={{ headerShown: false }}  />
       </Stack.Navigator>
     </NavigationContainer>
   );

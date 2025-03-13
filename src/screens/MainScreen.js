@@ -1,115 +1,101 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 
-const App = () => {
+const MainScreen = ({ navigation }) => {  // Destructuring navigation prop
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       {/* Header Section */}
       <View style={styles.header}>
-        <Image source={{ uri: 'https://via.placeholder.com/50' }} style={styles.avatar} />
-        <View>
-          <Text style={styles.headerText}>VALENTINO C I Std - A</Text>
-          <Text style={styles.subHeaderText}>Welcome Back!</Text>
-        </View>
+        <Icon name="check-circle" size={28} color="#F8F9FA" style={styles.headerIcon} />
+        <Text style={styles.headerText}>Secure Voting System</Text>
       </View>
 
-      {/* Grid Section */}
-      <View style={styles.grid}>
+      {/* Main Button Section */}
+      <View style={styles.gridContainer}>
         {[
-          { name: 'Attendance', icon: 'check-circle' },
-          { name: 'Messages', icon: 'envelope' },
-          { name: 'Profile', icon: 'user' },
-          { name: 'Marks', icon: 'graduation-cap' },
-          { name: 'Track Location', icon: 'map-marker' },
-          { name: 'Fees', icon: 'money' }
+          { name: 'Voter Registration', icon: 'user-edit', page: 'Registration' },
+          { name: 'Cast Your Vote', icon: 'vote-yea', page: 'Voting' },
+          { name: 'View Results', icon: 'chart-line', page: 'Results' },
+          { name: 'Admin Panel', icon: 'lock', page: 'Admin' },
         ].map((item, index) => (
-          <TouchableOpacity key={index} style={styles.gridItem}>
-            <Icon name={item.icon} size={30} color="#1e3a8a" />
+          <TouchableOpacity 
+            key={index} 
+            style={styles.gridItem} 
+            onPress={() => navigation.navigate(item.page)} // Corrected navigation
+          >
+            <Icon name={item.icon} size={38} color="#0056B3" />
             <Text style={styles.gridText}>{item.name}</Text>
           </TouchableOpacity>
         ))}
       </View>
-
-      {/* Activities Section */}
-      <View style={styles.activitiesHeader}>
-        <Text style={styles.activitiesText}>ACTIVITIES</Text>
-        <Text style={styles.seeAllText}>SEE ALL</Text>
-      </View>
-
-      <View style={styles.grid}>
-        {['Karate', 'Yoga', 'Bharathanatyam'].map((activity, index) => (
-          <TouchableOpacity key={index} style={styles.gridItem}>
-            <Text style={styles.gridText}>{activity}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#F8F9FA',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
-    backgroundColor: '#1e3a8a',
-    padding: 16,
+    backgroundColor: '#0056B3',
+    paddingVertical: 24,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
   },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 16,
+  headerIcon: {
+    marginRight: 12,
+    marginTop: 12,
   },
   headerText: {
-    color: '#ffffff',
+    color: '#F8F9FA',
     fontWeight: 'bold',
-    fontSize: 18,
+    fontSize: 24,
+    fontFamily: 'Open Sans',
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    marginTop: 12,
   },
-  subHeaderText: {
-    color: '#fbbf24',
-    fontSize: 14,
-  },
-  grid: {
-    padding: 16,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+  gridContainer: {
+    flex: 1,
+    width: '90%',
+    justifyContent: 'center',
+    paddingVertical: 20,
   },
   gridItem: {
-    backgroundColor: '#ffffff',
-    width: '30%',
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: '#EAECEE',
+    paddingVertical: 22,
+    paddingHorizontal: 16,
+    borderRadius: 12,
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
+    width: '100%',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#0056B3',
   },
   gridText: {
     textAlign: 'center',
-    marginTop: 8,
-  },
-  activitiesHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 8,
-  },
-  activitiesText: {
-    fontWeight: 'bold',
-  },
-  seeAllText: {
-    color: '#6b7280',
+    marginTop: 12,
+    color: '#2D2D44',
+    fontSize: 20,
+    fontFamily: 'Open Sans',
+    fontWeight: '700',
   },
 });
 
-export default App;
+export default MainScreen;
