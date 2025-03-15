@@ -10,7 +10,7 @@ const statesWithDistricts = { /* same as before */ };
 const cityList = { /* same as before */ };
 
 const RegistrationScreen = ({ navigation }) => {
-  
+
   const [fullName, setFullName] = useState('');
   const [dob, setDob] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -123,6 +123,7 @@ const RegistrationScreen = ({ navigation }) => {
             setDistrict('');
             setCity('');
           }} items={Object.keys(statesWithDistricts).map((state) => ({ label: state, value: state }))} />
+
           {state !== '' && (
             <>
               <Text>District</Text>
@@ -132,6 +133,7 @@ const RegistrationScreen = ({ navigation }) => {
               }} items={statesWithDistricts[state].map((district) => ({ label: district, value: district }))} />
             </>
           )}
+
           {district !== '' && (
             <>
               <Text>City</Text>
@@ -140,7 +142,7 @@ const RegistrationScreen = ({ navigation }) => {
           )}
 
           <Divider style={{ marginVertical: 20 }} />
-          <Button mode="contained" onPress={handleRegistration}>Register</Button>
+          <Button mode="contained" onPress={handleRegistration} buttonColor="rgb(0, 86, 179)">Register</Button>
         </Card>
       </View>
 
