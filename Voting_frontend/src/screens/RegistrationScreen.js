@@ -1,32 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
+import { TextInput, Button, Snackbar, Card, Divider, Dialog, Portal } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Crypto from 'expo-crypto';
 import RNPickerSelect from 'react-native-picker-select';
+import * as Clipboard from 'expo-clipboard';
 
-const statesWithDistricts = {
-  Maharashtra: ['Pune', 'Mumbai', 'Nagpur'],
-  Karnataka: ['Bangalore', 'Mysore', 'Hubli'],
-  Gujarat: ['Ahmedabad', 'Surat', 'Vadodara'],
-  TamilNadu: ['Chennai', 'Coimbatore', 'Madurai'],
-};
-
-const cityList = {
-  Pune: ['Hinjewadi', 'Shivaji Nagar', 'Kothrud'],
-  Mumbai: ['Andheri', 'Dadar', 'Borivali'],
-  Nagpur: ['Dharampeth', 'Sitabuldi', 'Manewada'],
-  Bangalore: ['Electronic City', 'Whitefield', 'Malleshwaram'],
-  Mysore: ['Hebbal', 'Vijayanagar', 'Kuvempunagar'],
-  Hubli: ['Gokul Road', 'Vidyanagar', 'Old Hubli'],
-  Ahmedabad: ['Navrangpura', 'Maninagar', 'Bopal'],
-  Surat: ['Adajan', 'Vesu', 'Varachha'],
-  Vadodara: ['Alkapuri', 'Gotri', 'Manjalpur'],
-  Chennai: ['Adyar', 'T. Nagar', 'Velachery'],
-  Coimbatore: ['RS Puram', 'Gandhipuram', 'Peelamedu'],
-  Madurai: ['Anna Nagar', 'KK Nagar', 'Alagappan Nagar'],
-};
+const statesWithDistricts = { /* same as before */ };
+const cityList = { /* same as before */ };
 
 const RegistrationScreen = ({ navigation }) => {
+  
   const [fullName, setFullName] = useState('');
   const [dob, setDob] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -36,14 +20,49 @@ const RegistrationScreen = ({ navigation }) => {
   const [district, setDistrict] = useState('');
   const [city, setCity] = useState('');
   const [voterId, setVoterId] = useState(null);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [dialogVisible, setDialogVisible] = useState(false);
 
-  // Generate unique voter ID using hashing
+  const statesWithDistricts = {
+    Maharashtra: ['Pune', 'Mumbai', 'Nagpur'],
+    Karnataka: ['Bangalore', 'Mysore', 'Hubli'],
+    Gujarat: ['Ahmedabad', 'Surat', 'Vadodara'],
+    TamilNadu: ['Chennai', 'Coimbatore', 'Madurai'],
+  };
+
+  const cityList = {
+    Pune: ['Hinjewadi', 'Shivaji Nagar', 'Kothrud'],
+    Mumbai: ['Andheri', 'Dadar', 'Borivali'],
+    Nagpur: ['Dharampeth', 'Sitabuldi', 'Manewada'],
+    Bangalore: ['Electronic City', 'Whitefield', 'Malleshwaram'],
+    Mysore: ['Hebbal', 'Vijayanagar', 'Kuvempunagar'],
+    Hubli: ['Gokul Road', 'Vidyanagar', 'Old Hubli'],
+    Ahmedabad: ['Navrangpura', 'Maninagar', 'Bopal'],
+    Surat: ['Adajan', 'Vesu', 'Varachha'],
+    Vadodara: ['Alkapuri', 'Gotri', 'Manjalpur'],
+    Chennai: ['Adyar', 'T. Nagar', 'Velachery'],
+    Coimbatore: ['RS Puram', 'Gandhipuram', 'Peelamedu'],
+    Madurai: ['Anna Nagar', 'KK Nagar', 'Alagappan Nagar'],
+  };
+
+
   const generateVoterID = async () => {
     const uniqueString = `${fullName}${dob}${aadhaar}${phone}${state}${district}${city}`;
     return await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, uniqueString);
   };
 
-  // Handle Registration Logic
+  const resetForm = () => {
+    setFullName('');
+    setDob(new Date());
+    setAadhaar('');
+    setPhone('');
+    setState('');
+    setDistrict('');
+    setCity('');
+    setVoterId(null);
+  };
+
   const handleRegistration = async () => {
     const today = new Date();
     const age = today.getFullYear() - dob.getFullYear();
@@ -51,142 +70,95 @@ const RegistrationScreen = ({ navigation }) => {
       age--;
     }
     if (age < 18) {
-      Alert.alert('Error', 'You must be at least 18 years old to register.');
+      setSnackbarMessage('You must be at least 18 years old to register.');
+      setSnackbarVisible(true);
       return;
     }
-
-    if (!/^\d{12}$/.test(aadhaar)) {
-      Alert.alert('Error', 'Aadhaar number must be 12 digits.');
+    if (!/\d{12}/.test(aadhaar)) {
+      setSnackbarMessage('Aadhaar number must be 12 digits.');
+      setSnackbarVisible(true);
       return;
     }
-
-    if (!/^\d{10}$/.test(phone)) {
-      Alert.alert('Error', 'Phone number must be 10 digits.');
+    if (!/\d{10}/.test(phone)) {
+      setSnackbarMessage('Phone number must be 10 digits.');
+      setSnackbarVisible(true);
       return;
     }
-
     if (!state || !district || !city) {
-      Alert.alert('Error', 'Please select your State, District, and City.');
+      setSnackbarMessage('Please select your State, District, and City.');
+      setSnackbarVisible(true);
       return;
     }
 
     const voterHash = await generateVoterID();
-    setVoterId(voterHash);
+    setVoterId(voterHash.substring(0, 10));
+    setDialogVisible(true);
+  };
 
-    const voterBlock = {
-      fullName,
-      dob: dob.toISOString().split('T')[0],
-      aadhaar,
-      phone,
-      state,
-      district,
-      city,
-      voterId: voterHash,
-      timestamp: new Date().toISOString(),
-    };
-
-    console.log('Blockchain Block:', JSON.stringify(voterBlock, null, 2));
-    Alert.alert('Success', `Registration Complete! Your Voter ID: ${voterHash.substring(0, 10)}`);
+  const copyToClipboard = () => {
+    Clipboard.setStringAsync(voterId);
+    setSnackbarMessage('Voter ID copied to clipboard!');
+    setSnackbarVisible(true);
   };
 
   return (
-    <View style={{ flex: 1, padding: 16 }}>
-  <Text>Full Name:</Text>
-  <TextInput
-    value={fullName}
-    onChangeText={setFullName}
-    placeholder="Enter your full name"
-    style={{ borderBottomWidth: 1, marginBottom: 16 }}
-  />
+    <ScrollView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+      <View style={{ padding: 20 }}>
+        <Card style={{ padding: 20, borderRadius: 10 }}>
+          <Text style={{ fontSize: 22, fontWeight: 'bold', marginBottom: 16 }}>Voter Registration</Text>
+          <TextInput label="Full Name" value={fullName} onChangeText={setFullName} mode="outlined" style={{ marginBottom: 10 }} />
+          <TextInput label="Date of Birth" value={dob.toDateString()} onFocus={() => setShowDatePicker(true)} mode="outlined" style={{ marginBottom: 10 }} />
+          {showDatePicker && (
+            <DateTimePicker value={dob} mode="date" display="default" onChange={(event, selectedDate) => {
+              setShowDatePicker(false);
+              if (selectedDate) setDob(selectedDate);
+            }} />
+          )}
+          <TextInput label="Aadhaar Number" value={aadhaar} onChangeText={setAadhaar} keyboardType="numeric" maxLength={12} mode="outlined" style={{ marginBottom: 10 }} />
+          <TextInput label="Phone Number" value={phone} onChangeText={setPhone} keyboardType="numeric" maxLength={10} mode="outlined" style={{ marginBottom: 10 }} />
+          
+          <Text>State</Text>
+          <RNPickerSelect onValueChange={(value) => {
+            setState(value);
+            setDistrict('');
+            setCity('');
+          }} items={Object.keys(statesWithDistricts).map((state) => ({ label: state, value: state }))} />
+          {state !== '' && (
+            <>
+              <Text>District</Text>
+              <RNPickerSelect onValueChange={(value) => {
+                setDistrict(value);
+                setCity('');
+              }} items={statesWithDistricts[state].map((district) => ({ label: district, value: district }))} />
+            </>
+          )}
+          {district !== '' && (
+            <>
+              <Text>City</Text>
+              <RNPickerSelect onValueChange={setCity} items={cityList[district].map((city) => ({ label: city, value: city }))} />
+            </>
+          )}
 
-  <Text>Date of Birth:</Text>
-  <TextInput
-    value={dob.toDateString()}
-    onFocus={() => setShowDatePicker(true)}
-    style={{ borderBottomWidth: 1, marginBottom: 16 }}
-  />
-  {showDatePicker && (
-    <DateTimePicker
-      value={dob}
-      mode="date"
-      display="default"
-      onChange={(event, selectedDate) => {
-        setShowDatePicker(false);
-        if (selectedDate) setDob(selectedDate);
-      }}
-    />
-  )}
+          <Divider style={{ marginVertical: 20 }} />
+          <Button mode="contained" onPress={handleRegistration}>Register</Button>
+        </Card>
+      </View>
 
-  <Text>Aadhaar Number:</Text>
-  <TextInput
-    value={aadhaar}
-    onChangeText={setAadhaar}
-    placeholder="Enter 12-digit Aadhaar"
-    keyboardType="numeric"
-    maxLength={12}
-    style={{ borderBottomWidth: 1, marginBottom: 16 }}
-  />
+      <Portal>
+        <Dialog visible={dialogVisible} onDismiss={() => { setDialogVisible(false); resetForm(); }}>
+          <Dialog.Title>Registration Complete</Dialog.Title>
+          <Dialog.Content>
+            <Text>Your Voter ID: {voterId}</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={copyToClipboard}>Copy Voter ID</Button>
+            <Button onPress={() => { setDialogVisible(false); resetForm(); }}>OK</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
 
-  <Text>Phone Number:</Text>
-  <TextInput
-    value={phone}
-    onChangeText={setPhone}
-    placeholder="Enter 10-digit Phone Number"
-    keyboardType="numeric"
-    maxLength={10}
-    style={{ borderBottomWidth: 1, marginBottom: 16 }}
-  />
-
-  <Text>State:</Text>
-  <RNPickerSelect
-  
-    onValueChange={(value) => {
-      setState(value);
-      setDistrict('');
-      setCity('');
-    }}
-    items={Object.keys(statesWithDistricts).map((state) => ({ label: state, value: state }))}
-    style={{ inputAndroid: { borderBottomWidth: 1, marginBottom: 16 } }}
-  />
-
-  {state !== '' && (
-    <>
-      <Text>District:</Text>
-      <RNPickerSelect
-      
-        onValueChange={(value) => {
-          setDistrict(value);
-          setCity('');
-        }}
-        items={statesWithDistricts[state].map((district) => ({ label: district, value: district }))}
-        style={{ inputAndroid: { borderBottomWidth: 1, marginBottom: 16 } }}
-      />
-    </>
-  )}
-
-  {district !== '' && (
-    <>
-      <Text>City:</Text>
-      <RNPickerSelect
-        onValueChange={setCity}
-        items={cityList[district].map((city) => ({ label: city, value: city }))}
-        style={{ inputAndroid: { borderBottomWidth: 1, marginBottom: 16 } }}
-      />
-    </>
-  )}
-
-  <Button title="Register" onPress={handleRegistration} />
-
-  {voterId && (
-    <Text style={{ marginTop: 16, fontWeight: 'bold' }}>
-      Your Voter ID: {voterId.substring(0, 10)}
-    </Text>
-  )}
-
-  <Button title="Go to Admin" onPress={() => navigation.navigate("Admin")} />
-  <Button title="Go to voting" onPress={() => navigation.navigate("Voting")} />
-</View>
-
+      <Snackbar visible={snackbarVisible} onDismiss={() => setSnackbarVisible(false)}>{snackbarMessage}</Snackbar>
+    </ScrollView>
   );
 };
 

@@ -2,14 +2,17 @@ import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import AppNavigator from "./src/navigation/AppNavigator";
+import { Provider as PaperProvider } from 'react-native-paper';
 
 
 export default function App() {
   return (
-    <>
-    <StatusBar style="auto" />
-    <AppNavigator />
-  </>
+      <>
+  <PaperProvider>
+          <StatusBar style="auto" />
+          <AppNavigator />
+  </PaperProvider>
+    </>
     // <View style={styles.container}>
     //   <Text>Hello World</Text>
     //   <StatusBar style="auto" />

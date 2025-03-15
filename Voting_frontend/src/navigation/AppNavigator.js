@@ -2,6 +2,7 @@ import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
 
+
 // Import your screens
 import RegistrationScreen from "../screens/RegistrationScreen";
 import AdminScreen from "../screens/AdminScreen";
