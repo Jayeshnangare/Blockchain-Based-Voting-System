@@ -47,10 +47,10 @@ const RegistrationScreen = ({ navigation }) => {
   };
 
 
-  const generateVoterID = async () => {
-    const uniqueString = `${fullName}${dob}${aadhaar}${phone}${state}${district}${city}`;
-    return await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, uniqueString);
-  };
+  // const generateVoterID = async () => {
+  //   const uniqueString = `${fullName}${dob}${aadhaar}${phone}${state}${district}${city}`;
+  //   return await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, uniqueString);
+  // };
 
   const resetForm = () => {
     setFullName('');
@@ -63,43 +63,109 @@ const RegistrationScreen = ({ navigation }) => {
     setVoterId(null);
   };
 
-  const handleRegistration = async () => {
-    const today = new Date();
-    const age = today.getFullYear() - dob.getFullYear();
-    if (today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())) {
-      age--;
-    }
-    if (age < 18) {
-      setSnackbarMessage('You must be at least 18 years old to register.');
-      setSnackbarVisible(true);
-      return;
-    }
-    if (!/\d{12}/.test(aadhaar)) {
-      setSnackbarMessage('Aadhaar number must be 12 digits.');
-      setSnackbarVisible(true);
-      return;
-    }
-    if (!/\d{10}/.test(phone)) {
-      setSnackbarMessage('Phone number must be 10 digits.');
-      setSnackbarVisible(true);
-      return;
-    }
-    if (!state || !district || !city) {
-      setSnackbarMessage('Please select your State, District, and City.');
-      setSnackbarVisible(true);
-      return;
-    }
+  // const handleRegistration = async () => {
+  //   const today = new Date();
+  //   const age = today.getFullYear() - dob.getFullYear();
+  //   if (today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())) {
+  //     age--;
+  //   }
+  //   if (age < 18) {
+  //     setSnackbarMessage('You must be at least 18 years old to register.');
+  //     setSnackbarVisible(true);
+  //     return;
+  //   }
+  //   if (!/\d{12}/.test(aadhaar)) {
+  //     setSnackbarMessage('Aadhaar number must be 12 digits.');
+  //     setSnackbarVisible(true);
+  //     return;
+  //   }
+  //   if (!/\d{10}/.test(phone)) {
+  //     setSnackbarMessage('Phone number must be 10 digits.');
+  //     setSnackbarVisible(true);
+  //     return;
+  //   }
+  //   if (!state || !district || !city) {
+  //     setSnackbarMessage('Please select your State, District, and City.');
+  //     setSnackbarVisible(true);
+  //     return;
+  //   }
 
-    const voterHash = await generateVoterID();
-    setVoterId(voterHash.substring(0, 10));
-    setDialogVisible(true);
-  };
+  //   const voterHash = await generateVoterID();
+  //   setVoterId(voterHash.substring(0, 10));
+  //   setDialogVisible(true);
+  // };
 
   const copyToClipboard = () => {
     Clipboard.setStringAsync(voterId);
     setSnackbarMessage('Voter ID copied to clipboard!');
     setSnackbarVisible(true);
   };
+
+  const handleRegistration = async () => {
+    const today = new Date();
+    const age = today.getFullYear() - dob.getFullYear();
+    if (today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())) {
+      age--;
+    }
+  
+    if (age < 18) {
+      setSnackbarMessage("You must be at least 18 years old to register.");
+      setSnackbarVisible(true);
+      return;
+    }
+  
+    if (!/\d{12}/.test(aadhaar)) {
+      setSnackbarMessage("Aadhaar number must be 12 digits.");
+      setSnackbarVisible(true);
+      return;
+    }
+  
+    if (!/\d{10}/.test(phone)) {
+      setSnackbarMessage("Phone number must be 10 digits.");
+      setSnackbarVisible(true);
+      return;
+    }
+  
+    if (!state || !district || !city) {
+      setSnackbarMessage("Please select your State, District, and City.");
+      setSnackbarVisible(true);
+      return;
+    }
+  
+    try {
+      const response = await fetch("http://192.168.0.103:5000/api/voters/register", {       
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: fullName,
+          age,
+          state,
+          district,
+          city,
+          phone,
+        }),
+      });
+  
+      const data = await response.json();
+      console.log("Response Data:", data); // Debugging log
+  
+      if (response.ok && data.voter_id) {
+        setVoterId(data.voter_id);
+        setDialogVisible(true);
+      } else {
+        setSnackbarMessage(data.message || "Registration failed.");
+        setSnackbarVisible(true);
+      }
+    } catch (error) {
+      console.error("Registration Error:", error);
+      setSnackbarMessage("Server error. Please try again.");
+      setSnackbarVisible(true);
+    }
+  };
+  
+  
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
@@ -150,8 +216,9 @@ const RegistrationScreen = ({ navigation }) => {
         <Dialog visible={dialogVisible} onDismiss={() => { setDialogVisible(false); resetForm(); }}>
           <Dialog.Title>Registration Complete</Dialog.Title>
           <Dialog.Content>
-            <Text>Your Voter ID: {voterId}</Text>
+            <Text>Your Voter ID: {voterId || "Not available"}</Text>
           </Dialog.Content>
+
           <Dialog.Actions>
             <Button onPress={copyToClipboard}>Copy Voter ID</Button>
             <Button onPress={() => { setDialogVisible(false); resetForm(); }}>OK</Button>

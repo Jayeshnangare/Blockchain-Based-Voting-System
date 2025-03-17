@@ -4,6 +4,9 @@ const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const voterRoutes = require("./Routes/voterRoutes");
 
+const cors = require("cors");
+
+
 // Load environment variables
 dotenv.config();
 
@@ -11,6 +14,13 @@ dotenv.config();
 const app = express();
 app.use(express.json()); // Ensure JSON parsing
 app.use(express.urlencoded({ extended: true })); // Handle URL-encoded data
+
+app.use(cors({
+    origin: "*", // Allow requests from any origin (for development)
+    methods: "GET,POST",
+    allowedHeaders: "Content-Type"
+}));
+
 
 // Connect to MongoDB
 mongoose
@@ -25,4 +35,5 @@ console.log("✅ Voter routes registered");
 
 // Start the server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on http://192.168.0.103:${PORT}`));
+// app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
