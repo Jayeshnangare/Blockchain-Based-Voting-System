@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const voterRoutes = require("./Routes/voterRoutes");
+const candidateRoutes = require("./Routes/candidateRoutes");
 
 const cors = require("cors");
 
@@ -30,6 +31,7 @@ mongoose
 
 // Routes
 app.use("/api/voters", voterRoutes);
+app.use("/api/candidates", candidateRoutes);
 
 console.log("✅ Voter routes registered");
 

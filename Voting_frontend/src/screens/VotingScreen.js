@@ -1,106 +1,303 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, Button, TextInput, TouchableOpacity, Alert } from "react-native";
-import { RadioButton } from "react-native-paper";
-import axios from "axios";
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, TextInput, StyleSheet } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import { useNavigation } from '@react-navigation/native';
 
-const VotingScreen = ({ navigation }) => {
-  const [voterId, setVoterId] = useState("");
-  const [otp, setOtp] = useState("");
+const VotingScreen = () => {
   const [candidates, setCandidates] = useState([]);
+  const [filteredCandidates, setFilteredCandidates] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [accountAddress, setAccountAddress] = useState('');
+  const [votingDates, setVotingDates] = useState('');
+  const [voteMessage, setVoteMessage] = useState('');
+  const [voterID, setVoterID] = useState('');
+  const [otp, setOtp] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [thankYouScreen, setThankYouScreen] = useState(false);
+
+  const navigation = useNavigation();
+
+  const citiesByState = {
+    Maharashtra: ['Mumbai', 'Pune', 'Nagpur'],
+    Delhi: ['New Delhi', 'North Delhi', 'South Delhi'],
+    'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai'],
+    Karnataka: ['Bangalore', 'Mysore', 'Hubli'],
+  };
 
   useEffect(() => {
-    axios.get("https://your-backend-api.com/candidates?city=user_city")
-      .then(response => setCandidates(response.data))
-      .catch(error => console.error("Error fetching candidates:", error));
+    setCandidates([
+      { name: 'Candidate 1', party: 'Party A', city: 'Mumbai', state: 'Maharashtra' },
+      { name: 'Candidate 2', party: 'Party B', city: 'Delhi', state: 'Delhi' },
+      { name: 'Candidate 3', party: 'Party C', city: 'Chennai', state: 'Tamil Nadu' },
+      { name: 'Candidate 4', party: 'Party D', city: 'Mumbai', state: 'Maharashtra' },
+      { name: 'Candidate 5', party: 'Party E', city: 'Delhi', state: 'Delhi' },
+      { name: 'Candidate 6', party: 'Party F', city: 'Bangalore', state: 'Karnataka' },
+    ]);
+    setVotingDates('Jan 1, 2025 - Jan 7, 2025');
+    setAccountAddress('0x1234567890abcdef');
   }, []);
 
-  const handleSendOtp = () => {
-    if (!voterId) {
-      Alert.alert("Error", "Please enter your Voting ID.");
-      return;
+  useEffect(() => {
+    if (state && city) {
+      setFilteredCandidates(
+        candidates.filter((candidate) => candidate.city === city && candidate.state === state)
+      );
+    } else {
+      setFilteredCandidates([]);
     }
-    axios.post("https://your-backend-api.com/send-otp", { voterId })
-      .then(response => {
-        if (response.data.success) {
-          setOtpSent(true);
-          Alert.alert("OTP Sent", "Enter the OTP received on your phone.");
-        } else {
-          Alert.alert("Error", response.data.message);
-        }
-      })
-      .catch(error => console.error("Error sending OTP:", error));
+  }, [state, city, candidates]);
+
+  const handleSendOtp = () => {
+    if (voterID.trim() !== '') {
+      setOtpSent(true);
+      setVoteMessage('OTP has been sent to your registered mobile number.');
+    } else {
+      setVoteMessage('Please enter a valid Voter ID.');
+    }
+  };
+
+  const handleLogin = () => {
+    if (otp.trim() !== '') {
+      setIsLoggedIn(true);
+      setVoteMessage('');
+    } else {
+      setVoteMessage('Please enter the OTP.');
+    }
   };
 
   const handleVote = () => {
-    if (!selectedCandidate) {
-      Alert.alert("Error", "Please select a candidate.");
-      return;
+    if (selectedCandidate) {
+      setVoteMessage(`You voted for ${selectedCandidate.name}`);
+      setThankYouScreen(true);
+    } else {
+      setVoteMessage('Please select a candidate to vote.');
     }
-    if (!otp) {
-      Alert.alert("Error", "Please enter the OTP.");
-      return;
-    }
-
-    axios.post("https://your-backend-api.com/verify-vote", { voterId, otp, candidateId: selectedCandidate })
-      .then(response => {
-        if (response.data.success) {
-          Alert.alert("Vote Recorded", "Your vote has been successfully cast!");
-          navigation.navigate("HomeScreen");
-        } else {
-          Alert.alert("Error", response.data.message);
-        }
-      })
-      .catch(error => console.error("Error verifying vote:", error));
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f3f4f6", padding: 16 }}>
-      <Text style={{ fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 10 }}>Voting Page</Text>
-
-      <TextInput
-        placeholder="Enter Your Voting ID"
-        value={voterId}
-        onChangeText={setVoterId}
-        style={{ width: "100%", padding: 10, borderWidth: 1, borderColor: "#ccc", borderRadius: 8, marginBottom: 10 }}
-      />
-
-      <TouchableOpacity onPress={handleSendOtp} style={{ backgroundColor: "#3b82f6", padding: 12, borderRadius: 8, marginBottom: 10 }}>
-        <Text style={{ color: "#fff", textAlign: "center", fontSize: 16 }}>Send OTP</Text>
-      </TouchableOpacity>
-
-      <View style={{ backgroundColor: "#fff", padding: 16, borderRadius: 10, shadowColor: "#000", shadowOpacity: 0.1, marginBottom: 10 }}>
-        <Text style={{ fontSize: 18, fontWeight: "600", marginBottom: 8 }}>Select Candidate</Text>
-        {candidates.map(candidate => (
-          <TouchableOpacity key={candidate.id} onPress={() => setSelectedCandidate(candidate.id)}>
-            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
-              <RadioButton
-                value={candidate.id}
-                status={selectedCandidate === candidate.id ? "checked" : "unchecked"}
-                onPress={() => setSelectedCandidate(candidate.id)}
-              />
-              <Text style={{ fontSize: 16 }}>{candidate.name} ({candidate.party})</Text>
-            </View>
+    <View style={styles.container}>
+      {thankYouScreen ? (
+        <View style={styles.thankYouContainer}>
+          <Text style={styles.thankYouText}>Thank you for voting!</Text>
+          <TouchableOpacity style={styles.voteButton} onPress={() => navigation.navigate('Main')}>
+            <Text style={styles.voteButtonText}>Go to HOME PAGE</Text>
           </TouchableOpacity>
-        ))}
-      </View>
+        </View>
+      ) : (
+        <>
+          <View style={styles.header}>
+            <Text style={styles.headerText}>Welcome to Voting</Text>
+            <Text style={styles.headerText}>Voting Dates: {votingDates}</Text>
+          </View>
 
-      {otpSent && (
-        <TextInput
-          placeholder="Enter OTP"
-          value={otp}
-          onChangeText={setOtp}
-          style={{ width: "100%", padding: 10, borderWidth: 1, borderColor: "#ccc", borderRadius: 8, marginBottom: 10 }}
-          keyboardType="numeric"
-        />
+          {!isLoggedIn ? (
+            <>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter Voter ID"
+                value={voterID}
+                onChangeText={setVoterID}
+              />
+              <TouchableOpacity onPress={handleSendOtp} style={styles.voteButton}>
+                <Text style={styles.voteButtonText}>Send OTP</Text>
+              </TouchableOpacity>
+              {otpSent && (
+                <>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter OTP"
+                    value={otp}
+                    onChangeText={setOtp}
+                  />
+                  <TouchableOpacity onPress={handleLogin} style={styles.voteButton}>
+                    <Text style={styles.voteButtonText}>Login</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+              {voteMessage ? <Text style={styles.voteMessage}>{voteMessage}</Text> : null}
+            </>
+          ) : (
+            <>
+              <Picker selectedValue={state} style={styles.picker} onValueChange={setState}>
+                <Picker.Item label="Please select a state" value="" />
+                {Object.keys(citiesByState).map((stateName) => (
+                  <Picker.Item key={stateName} label={stateName} value={stateName} />
+                ))}
+              </Picker>
+
+              {state ? (
+                <Picker selectedValue={city} style={styles.picker} onValueChange={setCity}>
+                  <Picker.Item label="Please select a city" value="" />
+                  {citiesByState[state]?.map((cityOption, index) => (
+                    <Picker.Item key={index} label={cityOption} value={cityOption} />
+                  ))}
+                </Picker>
+              ) : (
+                <Text style={styles.errorText}>Please select a state first</Text>
+              )}
+
+              {filteredCandidates.length > 0 ? (
+                <>
+                  <View style={styles.candidateList}>
+                    {filteredCandidates.map((candidate, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.candidateRow}
+                        onPress={() => setSelectedCandidate(candidate)}
+                      >
+                        <Text
+                          style={[
+                            styles.candidateText,
+                            selectedCandidate?.name === candidate.name && styles.boldCandidate,
+                          ]}
+                        >
+                          {selectedCandidate?.name === candidate.name ? '🔘' : '⚪'} {candidate.name} ({candidate.party})
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  <TouchableOpacity onPress={handleVote} style={styles.voteButton}>
+                    <Text style={styles.voteButtonText}>Vote</Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <Text style={styles.noCandidates}>No candidates available for your location.</Text>
+              )}
+
+              <Text style={styles.account}>Account Address: {accountAddress}</Text>
+            </>
+          )}
+        </>
       )}
-
-      <TouchableOpacity onPress={handleVote} style={{ backgroundColor: "#10b981", padding: 12, borderRadius: 8 }}>
-        <Text style={{ color: "#fff", textAlign: "center", fontSize: 16 }}>Submit Vote</Text>
-      </TouchableOpacity>
     </View>
   );
 };
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F9FA',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  header: {
+    backgroundColor: '#0056B3',
+    paddingVertical: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  headerText: {
+    color: '#F8F9FA',
+    fontWeight: 'bold',
+    fontSize: 20,
+    fontFamily: 'Open Sans',
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#0056B3',
+    borderRadius: 12,
+    width: '90%',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    fontSize: 18,
+    marginVertical: 10,
+    backgroundColor: '#FFF',
+  },
+  picker: {
+    height: 50,
+    width: '90%',
+    marginVertical: 10,
+    borderWidth: 1,
+    borderColor: '#0056B3',
+    borderRadius: 12,
+    backgroundColor: '#FFF',
+  },
+  candidateList: {
+    marginTop: 30,
+    marginBottom: 20,
+    width: '90%',
+  },
+  candidateRow: {
+    paddingVertical: 22,
+    paddingHorizontal: 16,
+    backgroundColor: '#EAECEE',
+    marginVertical: 5,
+    borderRadius: 12,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  candidateText: {
+    fontSize: 18,
+  },
+  boldCandidate: {
+    fontWeight: 'bold',
+  },
+  instructions: {
+    fontSize: 16,
+    color: '#495057',
+    marginVertical: 10,
+    textAlign: 'center',
+  },
+  voteButton: {
+    backgroundColor: '#0056B3',
+    paddingVertical: 14,
+    paddingHorizontal: 36,
+    borderRadius: 24,
+    marginVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '90%',
+  },
+  voteButtonText: {
+    color: '#F8F9FA',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+  },
+  thankYouContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 50,
+  },
+  thankYouText: {
+    fontSize: 22,
+    color: '#28A745',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  voteMessage: {
+    fontSize: 16,
+    color: '#28A745',
+    marginVertical: 10,
+  },
+  noCandidates: {
+    fontSize: 16,
+    color: '#FF6347',
+    marginVertical: 20,
+    textAlign: 'center',
+  },
+  account: {
+    marginTop: 20,
+    fontSize: 16,
+    color: '#495057',
+    textAlign: 'center',
+  },
+});
 
 export default VotingScreen;

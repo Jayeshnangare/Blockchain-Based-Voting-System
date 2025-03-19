@@ -17,7 +17,7 @@ const MainScreen = ({ navigation }) => {  // Destructuring navigation prop
           { name: 'Voter Registration', icon: 'user-edit', page: 'Registration' },
           { name: 'Cast Your Vote', icon: 'vote-yea', page: 'Voting' },
           { name: 'View Results', icon: 'chart-line', page: 'Results' },
-          { name: 'Admin Panel', icon: 'lock', page: 'Admin' },
+          { name: 'Admin Panel', icon: 'lock', page: 'AdminLogin' },
         ].map((item, index) => (
           <TouchableOpacity 
             key={index} 

@@ -5,7 +5,6 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Crypto from 'expo-crypto';
 import RNPickerSelect from 'react-native-picker-select';
 import * as Clipboard from 'expo-clipboard';
-const dotenv = require("dotenv");
 
 const statesWithDistricts = { /* same as before */ };
 const cityList = { /* same as before */ };
@@ -134,7 +133,7 @@ const RegistrationScreen = ({ navigation }) => {
     }
   
     try {
-      const response = await fetch(process.env.MONGO_URI+":5000/api/voters/register", {       
+      const response = await fetch("http://192.168.0.103:5000/api/voters/register", {       
         method: "POST",
         headers: {
           "Content-Type": "application/json",
