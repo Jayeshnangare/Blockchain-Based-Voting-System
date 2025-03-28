@@ -15,7 +15,7 @@ const MainScreen = ({ navigation }) => {  // Destructuring navigation prop
       <View style={styles.gridContainer}>
         {[
           { name: 'Voter Registration', icon: 'user-edit', page: 'Registration' },
-          { name: 'Cast Your Vote', icon: 'vote-yea', page: 'Voting' },
+          { name: 'Cast Your Vote', icon: 'vote-yea', page: 'VotingEligibility' },
           { name: 'View Results', icon: 'chart-line', page: 'Results' },
           { name: 'Admin Panel', icon: 'lock', page: 'AdminLogin' },
         ].map((item, index) => (

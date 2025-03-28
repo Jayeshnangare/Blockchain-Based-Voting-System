@@ -13,6 +13,7 @@ import VotingEvent from "../screens/VotingEvent";
 import AdminLoginScreen from "../screens/AdminLoginScreen"; 
 import AdminMainScreen from "../screens/AdminMainScreen"; // Added Admin Dashboard
 import CandidateRegistrationScreen from "../screens/CandidateRegistrationScreen";
+import VotingEligibility from "../screens/VotingEligibility";
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
@@ -26,6 +27,7 @@ const AppNavigator = () => {
         <Stack.Screen name="Voting_Event" component={VotingEvent}  />
         <Stack.Screen name="ViewCandidate" component={ViewCandidate}  />
         <Stack.Screen name="AdminLogin" component={AdminLoginScreen} />
+        <Stack.Screen name="VotingEligibility" component={VotingEligibility} />
         <Stack.Screen name="AdminMain" component={AdminMainScreen} options={{ title: "Admin Dashboard" }} />
         <Stack.Screen name="CandidateRegistration" component={CandidateRegistrationScreen} options={{ title: "Candidate Registration" }} />
       </Stack.Navigator>
