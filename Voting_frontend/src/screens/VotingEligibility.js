@@ -16,7 +16,7 @@ const VotingEligibility = () => {
         setEventData(null);
         setIsEligible(null);
 
-        const response = await axios.get(`http://192.168.0.103:5000/api/voting-events/voting-id/${voterId}`);
+        const response = await axios.get(`http://192.168.0.104:5000/api/voting-events/voting-id/${voterId}`);
 
         if (!response.data || Object.keys(response.data).length === 0) {
             setErrorMessage('No voting event found for your city.');

@@ -53,7 +53,7 @@ const CandidateRegistrationScreen = () => {
     }
 
     try {
-      const response = await axios.post("http://192.168.0.103:5000/api/candidates/add", candidate);
+      const response = await axios.post("http://192.168.0.104:5000/api/candidates/add", candidate);
       Alert.alert("Success", response.data.message);
       setCandidate({ name: "", party: "", state: "", district: "", city: "", phone: "", aadhar: "" });
     } catch (error) {

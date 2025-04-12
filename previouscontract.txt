@@ -1,0 +1,50 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract Voting {
+    struct Vote {
+        string voterID;   // Unique ID of the voter
+        uint256 candidateAadhar; // Candidate's unique Aadhar ID
+        uint256 voteCount; // Candidate's updated vote count
+    }
+
+    mapping(uint256 => uint256) public candidateVotes; // Candidate Aadhar ID -> Vote Count
+    mapping(string => bool) public hasVoted; // Voter Unique ID -> Has voted or not
+    uint256[] public candidateIds; // List of all candidate Aadhar IDs
+
+    event VoteCasted(string voterID, uint256 candidateAadhar, uint256 newVoteCount);
+
+    // Cast a vote (called from the backend after validating voter & candidate from MongoDB)
+    function vote(string memory _voterID, uint256 _candidateAadhar) public {
+        require(!hasVoted[_voterID], "Voter has already voted");
+
+        // Increase candidate's vote count
+        candidateVotes[_candidateAadhar] += 1;
+        hasVoted[_voterID] = true;
+
+        // Emit event for frontend
+        emit VoteCasted(_voterID, _candidateAadhar, candidateVotes[_candidateAadhar]);
+    }
+
+    // Get election results (returns candidate IDs and their vote counts)
+    function getResults() public view returns (uint256[] memory, uint256[] memory) {
+        uint256[] memory votes = new uint256[](candidateIds.length);
+        for (uint256 i = 0; i < candidateIds.length; i++) {
+            votes[i] = candidateVotes[candidateIds[i]];
+        }
+        return (candidateIds, votes);
+    }
+
+    // Admin initializes candidates in blockchain (MongoDB already stores candidate details)
+    function initializeCandidates(uint256[] memory _candidateIds) public {
+        candidateIds = _candidateIds;
+    }
+    
+    function addCandidate(uint256 _aadhar) public {
+    // Avoid duplicate entries
+    for (uint i = 0; i < candidateIds.length; i++) {
+        require(candidateIds[i] != _aadhar, "Candidate already exists");
+    }
+    candidateIds.push(_aadhar);
+}
+}

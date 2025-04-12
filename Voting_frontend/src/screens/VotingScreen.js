@@ -15,6 +15,7 @@ const VotingScreen = () => {
   const [thankYouScreen, setThankYouScreen] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+  const [candidate_adhar, setCandidate_adhar] = useState(null);
 
   // 📌 Function: Send OTP
   const handleSendOtp = async () => {
@@ -23,7 +24,7 @@ const VotingScreen = () => {
     setLoading(true);
     
     try {
-      const response = await fetch('http://192.168.0.103:5000/api/voters/send-otp', {
+      const response = await fetch('http://192.168.0.104:5000/api/voters/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ voterID }),
@@ -54,7 +55,7 @@ const VotingScreen = () => {
     try {
       console.log("Sending Voter ID:", voterID);
   
-      const response = await fetch('http://192.168.0.103:5000/api/voters/verify-otp', {
+      const response = await fetch('http://192.168.0.104:5000/api/voters/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ voterID, otp }),
@@ -105,7 +106,7 @@ const VotingScreen = () => {
   const fetchCandidates = async (city) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://192.168.0.103:5000/api/candidates/filter?state=Maharashtra&city=${city}`);
+      const response = await fetch(`http://192.168.0.104:5000/api/candidates/filter?state=Maharashtra&city=${city}`);
       const data = await response.json();
   
       console.log("API Response:", data);
@@ -131,29 +132,36 @@ const VotingScreen = () => {
 
   // 📌 Function: Submit Vote
   const handleVote = async () => {
-    if (!selectedCandidate) return Alert.alert('Error', 'Please select a candidate to vote.');
+    if (!selectedCandidate) {
+        Alert.alert('Error', 'Please select a candidate to vote.');
+        return;
+    }
 
-    // setLoading(true);
-    // try {
-    //   const response = await fetch('http://your-backend-url/api/submit-vote', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ voterID, candidateName: selectedCandidate.name }),
-    //   });
+    console.log("Selected candidate:", selectedCandidate.aadhar);
+    console.log("Voter ID:", voterID);
 
-    //   const data = await response.json();
-    //   setLoading(false);
+    setLoading(true);
+    try {
+        const response = await fetch("http://192.168.0.104:5000/api/voters/vote", {  // FIXED URL
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ voterAddress: voterID, candidateId: parseInt(selectedCandidate.aadhar) })  // FIXED FIELD NAME
+        });
 
-    //   if (response.ok) {
-    //     setThankYouScreen(true);
-    //   } else {
-    //     Alert.alert('Error', data.message);
-    //   }
-    // } catch (error) {
-    //   setLoading(false);
-    //   Alert.alert('Error', 'Failed to submit vote.');
-    // }
-  };
+        const data = await response.json();
+        setLoading(false);
+
+        if (response.ok) {
+            setThankYouScreen(true);
+        } else {
+            Alert.alert('Error', data.message);
+        }
+    } catch (error) {
+        setLoading(false);
+        console.error("Vote submission error:", error);
+        Alert.alert('Error', 'Failed to submit vote.');
+    }
+};
 
   return (
     <View style={styles.container}>

@@ -64,7 +64,7 @@ const VotingEvent = () => {
     console.log("📤 Sending event details:", eventDetails);
   
     try {
-      const response = await fetch("http://192.168.0.103:5000/api/voting-events/create", {
+      const response = await fetch("http://192.168.0.104:5000/api/voting-events/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(eventDetails),

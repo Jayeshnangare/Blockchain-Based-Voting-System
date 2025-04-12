@@ -40,7 +40,7 @@ const ViewCandidate = () => {
 
     try {
       const response = await fetch(
-        `http://192.168.0.103:5000/api/candidates/filter?state=${selectedState}&district=${selectedDistrict}&city=${selectedCity}`
+        `http://192.168.0.104:5000/api/candidates/filter?state=${selectedState}&district=${selectedDistrict}&city=${selectedCity}`
       );
       const data = await response.json();
 

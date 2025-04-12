@@ -56,11 +56,33 @@ const ResultsScreen = ({ navigation }) => {
     setResults([]);
   };
 
-  const handleCityChange = (city) => {
+  // const handleCityChange = (city) => {
+  //   setSelectedCity(city);
+  //   const filteredResults = allResults.filter((result) => result.city === city);
+  //   setResults(filteredResults);
+  // };
+
+  const handleCityChange = async (city) => {
     setSelectedCity(city);
-    const filteredResults = allResults.filter((result) => result.city === city);
-    setResults(filteredResults);
+    try {
+      const response = await fetch(`http://192.168.0.104:5000/api/results?state=${selectedState}&district=${selectedDistrict}&city=${city}`);
+      const data = await response.json();
+      console.log(response);
+
+
+      if (Array.isArray(data)) {
+        setResults(data);
+        
+      } else {
+        setResults([]);
+        Alert.alert("No results found.");
+      }
+    } catch (error) {
+      console.error("Error fetching results:", error);
+      setResults([]);
+    }
   };
+  
 
   return (
     <View style={styles.container}>

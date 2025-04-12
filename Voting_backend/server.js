@@ -6,9 +6,20 @@ const voterRoutes = require("./Routes/voterRoutes");
 const candidateRoutes = require("./Routes/candidateRoutes");
 const votingEventRoutes = require("./Routes/VotingEventRoutes");
 
-
-
 const cors = require("cors");
+
+
+//const Web3 = require("web3");
+const contractABI = require("D:/Blockchain-Based-Voting-System/Voting_frontend/build/contracts/Voting.json");  // ABI from Truffle
+const contractAddress = "0x6754Cf3c8fB41A7205a8D02D4674EAa15FD63bea";  // Change to your deployed contract address
+
+const { Web3 } = require("web3");  // Web3.js v4 requires destructuring
+
+const web3 = new Web3("http://127.0.0.1:7545");
+
+
+//const votingContract = new web3.eth.Contract(contractABI, contractAddress);
+const votingContract = new web3.eth.Contract(contractABI.abi, contractAddress);
 
 
 // Load environment variables

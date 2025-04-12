@@ -133,7 +133,7 @@ const RegistrationScreen = ({ navigation }) => {
     }
   
     try {
-      const response = await fetch("http://192.168.0.103:5000/api/voters/register", {       
+      const response = await fetch("http://192.168.0.104:5000/api/voters/register", {       
         method: "POST",
         headers: {
           "Content-Type": "application/json",
